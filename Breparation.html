@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhoneFix 95 — Devis réparation</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #f0f4ff;
+    min-height: 100vh;
+    padding: 30px 20px;
+  }
+
+  .page { max-width: 680px; margin: 0 auto; }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #0047CC, #0066FF);
+    border-radius: 20px;
+    padding: 32px 36px;
+    margin-bottom: 20px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::after {
+    content: '🔧';
+    position: absolute;
+    right: 30px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 64px;
+    opacity: 0.15;
+  }
+  .header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 42px;
+    letter-spacing: 2px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .header h1 span { color: #FFD600; }
+  .header p { font-size: 14px; opacity: 0.8; }
+
+  /* STEPS */
+  .steps-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .step-dot {
+    flex: 1;
+    height: 5px;
+    background: #d0d9f0;
+    border-radius: 10px;
+    transition: background 0.3s;
+  }
+  .step-dot.active { background: #0047CC; }
+  .step-dot.done { background: #00c896; }
+
+  /* CARD */
+  .card {
+    background: white;
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 16px;
+    box-shadow: 0 4px 20px rgba(0,60,160,0.08);
+  }
+
+  .card-title {
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: #0047CC;
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .card h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: #0d1a33;
+    margin-bottom: 20px;
+  }
+
+  /* OPTIONS GRID */
+  .options-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .option-btn {
+    border: 2px solid #e0e8f8;
+    background: #f8faff;
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .option-btn:hover { border-color: #0066FF; background: #eef4ff; }
+  .option-btn.selected { border-color: #0047CC; background: #eef4ff; box-shadow: 0 0 0 3px rgba(0,71,204,0.12); }
+
+  .option-btn .opt-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+  .option-btn .opt-name { font-size: 13px; font-weight: 700; color: #0d1a33; display: block; }
+  .option-btn .opt-sub { font-size: 11px; color: #888; margin-top: 2px; display: block; }
+
+  /* REPARATION OPTIONS */
+  .repair-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .repair-btn {
+    border: 2px solid #e0e8f8;
+    background: #f8faff;
+    border-radius: 14px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    text-align: left;
+  }
+  .repair-btn:hover { border-color: #0066FF; background: #eef4ff; }
+  .repair-btn.selected { border-color: #0047CC; background: #eef4ff; box-shadow: 0 0 0 3px rgba(0,71,204,0.12); }
+
+  .repair-left { display: flex; align-items: center; gap: 14px; }
+  .repair-icon {
+    width: 42px; height: 42px;
+    background: #eef4ff;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .repair-name { font-size: 15px; font-weight: 700; color: #0d1a33; display: block; }
+  .repair-desc { font-size: 12px; color: #888; margin-top: 2px; display: block; }
+  .repair-price {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0047CC;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .repair-price span { display: block; font-size: 11px; color: #aaa; font-weight: 400; }
+
+  /* DEVIS RESULT */
+  .devis-card {
+    background: linear-gradient(135deg, #0047CC, #0066FF);
+    border-radius: 20px;
+    padding: 32px;
+    color: white;
+    margin-bottom: 16px;
+  }
+  .devis-card .devis-label { font-size: 11px; letter-spacing: 3px; opacity: 0.7; text-transform: uppercase; margin-bottom: 8px; }
+  .devis-card .devis-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 1px; margin-bottom: 20px; }
+
+  .devis-lines { background: rgba(255,255,255,0.1); border-radius: 14px; padding: 16px 20px; margin-bottom: 20px; }
+  .devis-line { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+  .devis-line + .devis-line { border-top: 1px solid rgba(255,255,255,0.15); }
+  .devis-line .dl-label { font-size: 14px; opacity: 0.85; }
+  .devis-line .dl-val { font-size: 14px; font-weight: 700; }
+  .devis-line.total .dl-label { font-size: 16px; font-weight: 700; opacity: 1; }
+  .devis-line.total .dl-val { font-size: 20px; color: #FFD600; }
+
+  .devis-note { font-size: 12px; opacity: 0.65; line-height: 1.5; margin-bottom: 20px; }
+
+  .cta-btn {
+    display: block;
+    background: #FFD600;
+    color: #0d1a33;
+    font-size: 16px;
+    font-weight: 700;
+    padding: 16px;
+    border-radius: 12px;
+    text-align: center;
+    text-decoration: none;
+    margin-bottom: 10px;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .cta-btn:hover { background: #f0cb00; }
+
+  .reset-btn {
+    display: block;
+    background: rgba(255,255,255,0.15);
+    color: white;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 12px;
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    border: none;
+    width: 100%;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .reset-btn:hover { background: rgba(255,255,255,0.25); }
+
+  /* HIDDEN */
+  .hidden { display: none; }
+
+  /* FOOTER */
+  .footer-info {
+    background: white;
+    border-radius: 16px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 20px rgba(0,60,160,0.06);
+  }
+  .footer-info .phone-icon { font-size: 32px; }
+  .footer-info .phone-label { font-size: 12px; color: #888; }
+  .footer-info .phone-num { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: #0047CC; letter-spacing: 2px; }
+  .footer-info .phone-sub { font-size: 12px; color: #aaa; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>DEVIS <span>GRATUIT</span><br>EN 30 SECONDES</h1>
+    <p>Sélectionnez votre téléphone et votre réparation</p>
+  </div>
+
+  <!-- STEPS BAR -->
+  <div class="steps-bar">
+    <div class="step-dot active" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+    <div class="step-dot" id="dot3"></div>
+    <div class="step-dot" id="dot4"></div>
+  </div>
+
+  <!-- STEP 1 : MARQUE -->
+  <div class="card" id="step1">
+    <div class="card-title">Étape 1 sur 3</div>
+    <h2>Quelle est la marque de votre téléphone ?</h2>
+    <div class="options-grid">
+      <div class="option-btn" onclick="selectBrand('Apple','🍎')">
+        <span class="opt-icon">🍎</span>
+        <span class="opt-name">Apple</span>
+        <span class="opt-sub">iPhone</span>
+      </div>
+      <div class="option-btn" onclick="selectBrand('Samsung','📱')">
+        <span class="opt-icon">📱</span>
+        <span class="opt-name">Samsung</span>
+        <span class="opt-sub">Galaxy</span>
+      </div>
+      <div class="option-btn" onclick="selectBrand('Xiaomi','⚡')">
+        <span class="opt-icon">⚡</span>
+        <span class="opt-name">Xiaomi</span>
+        <span class="opt-sub">Redmi / Mi</span>
+      </div>
+      <div class="option-btn" onclick="selectBrand('Huawei','🌐')">
+        <span class="opt-icon">🌐</span>
+        <span class="opt-name">Huawei</span>
+        <span class="opt-sub">P / Mate</span>
+      </div>
+      <div class="option-btn" onclick="selectBrand('OnePlus','🔴')">
+        <span class="opt-icon">🔴</span>
+        <span class="opt-name">OnePlus</span>
+        <span class="opt-sub">Nord / Pro</span>
+      </div>
+      <div class="option-btn" onclick="selectBrand('Autre','📲')">
+        <span class="opt-icon">📲</span>
+        <span class="opt-name">Autre</span>
+        <span class="opt-sub">Oppo, Sony…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 : MODELE -->
+  <div class="card hidden" id="step2">
+    <div class="card-title">Étape 2 sur 3</div>
+    <h2 id="step2-title">Quel est votre modèle ?</h2>
+    <div class="options-grid" id="models-grid"></div>
+  </div>
+
+  <!-- STEP 3 : REPARATION -->
+  <div class="card hidden" id="step3">
+    <div class="card-title">Étape 3 sur 3</div>
+    <h2>Quelle réparation souhaitez-vous ?</h2>
+    <div class="repair-list">
+      <div class="repair-btn" onclick="selectRepair('Écran cassé','📱',10,25)">
+        <div class="repair-left">
+          <div class="repair-icon">📱</div>
+          <div>
+            <span class="repair-name">Écran cassé</span>
+            <span class="repair-desc">Remplacement complet de l'écran</span>
+          </div>
+        </div>
+        <div class="repair-price">10 – 25€<span>+ pièce</span></div>
+      </div>
+      <div class="repair-btn" onclick="selectRepair('Batterie HS','🔋',15,25)">
+        <div class="repair-left">
+          <div class="repair-icon">🔋</div>
+          <div>
+            <span class="repair-name">Batterie HS</span>
+            <span class="repair-desc">Remplacement de la batterie</span>
+          </div>
+        </div>
+        <div class="repair-price">15 – 25€<span>+ pièce</span></div>
+      </div>
+      <div class="repair-btn" onclick="selectRepair('Connecteur de charge','⚡',25,35)">
+        <div class="repair-left">
+          <div class="repair-icon">⚡</div>
+          <div>
+            <span class="repair-name">Connecteur de charge</span>
+            <span class="repair-desc">Remplacement port USB / Lightning</span>
+          </div>
+        </div>
+        <div class="repair-price">25 – 35€<span>+ pièce</span></div>
+      </div>
+      <div class="repair-btn" onclick="selectRepair('Caméra','📷',20,30)">
+        <div class="repair-left">
+          <div class="repair-icon">📷</div>
+          <div>
+            <span class="repair-name">Caméra</span>
+            <span class="repair-desc">Caméra avant ou arrière</span>
+          </div>
+        </div>
+        <div class="repair-price">20 – 30€<span>+ pièce</span></div>
+      </div>
+      <div class="repair-btn" onclick="selectRepair('Vitre arrière','🔲',20,35)">
+        <div class="repair-left">
+          <div class="repair-icon">🔲</div>
+          <div>
+            <span class="repair-name">Vitre arrière</span>
+            <span class="repair-desc">Remplacement de la vitre arrière</span>
+          </div>
+        </div>
+        <div class="repair-price">20 – 35€<span>+ pièce</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 : DEVIS -->
+  <div class="devis-card hidden" id="step4">
+    <div class="devis-label">Votre devis estimatif</div>
+    <div class="devis-title" id="devis-title">Réparation — iPhone 13</div>
+    <div class="devis-lines">
+      <div class="devis-line">
+        <span class="dl-label">🔧 Main d'œuvre</span>
+        <span class="dl-val" id="devis-mo">30 – 40€</span>
+      </div>
+      <div class="devis-line">
+        <span class="dl-label">📦 Prix de la pièce</span>
+        <span class="dl-val" id="devis-composant">Sur devis</span>
+      </div>
+      <div class="devis-line total">
+        <span class="dl-label">💰 Total estimé</span>
+        <span class="dl-val" id="devis-total">À confirmer</span>
+      </div>
+    </div>
+    <div class="devis-note" id="devis-note">
+      ⚠️ Ce devis est indicatif. Le prix du composant dépend de votre modèle exact. Contactez-moi pour un devis précis et gratuit !
+    </div>
+    <button class="cta-btn" onclick="window.location='tel:0613220622'">📞 Appeler le 06 13 22 06 22</button>
+    <button class="reset-btn" onclick="resetAll()">↩ Recommencer</button>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer-info">
+    <span class="phone-icon">📧</span>
+    <div>
+      <div class="phone-label">Email</div>
+      <div class="phone-num" style="font-size:18px;">repair.phonelas95@gmail.com</div>
+      <div class="phone-sub">Réponse rapide</div>
+    </div>
+  </div>
+
+  <div class="footer-info">
+    <span class="phone-icon">📍</span>
+    <div>
+      <div class="phone-label">Zone d'intervention</div>
+      <div class="phone-num">VAL-D'OISE (95)</div>
+      <div class="phone-sub">Je me déplace ou vous venez chez moi à Jouy-le-Moutier</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let selectedBrand = '';
+  let selectedModel = '';
+  let selectedRepair = '';
+
+  const models = {
+    Apple: [
+      { name: 'iPhone 17 Pro Max', icon: '📱' },
+      { name: 'iPhone 17 Pro', icon: '📱' },
+      { name: 'iPhone 17 Air', icon: '📱' },
+      { name: 'iPhone 17', icon: '📱' },
+      { name: 'iPhone 17e', icon: '📱' },
+      { name: 'iPhone 16 Pro Max', icon: '📱' },
+      { name: 'iPhone 16 Pro', icon: '📱' },
+      { name: 'iPhone 16 / Plus', icon: '📱' },
+      { name: 'iPhone 16e', icon: '📱' },
+      { name: 'iPhone 15 Pro Max', icon: '📱' },
+      { name: 'iPhone 15 Pro', icon: '📱' },
+      { name: 'iPhone 15 / Plus', icon: '📱' },
+      { name: 'iPhone 14 Pro Max', icon: '📱' },
+      { name: 'iPhone 14 Pro', icon: '📱' },
+      { name: 'iPhone 14 / Plus', icon: '📱' },
+      { name: 'iPhone 13 / Pro / Max', icon: '📱' },
+      { name: 'iPhone 12 / Pro / Max', icon: '📱' },
+      { name: 'iPhone 11 / Pro / Max', icon: '📱' },
+      { name: 'iPhone XS / XR / X', icon: '📱' },
+      { name: 'iPhone SE (toutes versions)', icon: '📱' },
+      { name: 'Autre iPhone', icon: '📱' },
+    ],
+    Samsung: [
+      { name: 'Galaxy S26 / S26+ / Ultra', icon: '📱' },
+      { name: 'Galaxy S25 / S25+ / Ultra', icon: '📱' },
+      { name: 'Galaxy S25 Edge', icon: '📱' },
+      { name: 'Galaxy S24 / S24+ / Ultra', icon: '📱' },
+      { name: 'Galaxy S24 FE', icon: '📱' },
+      { name: 'Galaxy S23 / S23+ / Ultra', icon: '📱' },
+      { name: 'Galaxy S22 / S22+ / Ultra', icon: '📱' },
+      { name: 'Galaxy S21 / S21+ / Ultra', icon: '📱' },
+      { name: 'Galaxy A56 / A55 / A54', icon: '📱' },
+      { name: 'Galaxy A36 / A35 / A34', icon: '📱' },
+      { name: 'Galaxy A26 / A25 / A16', icon: '📱' },
+      { name: 'Galaxy Z Fold 6 / Flip 6', icon: '📱' },
+      { name: 'Galaxy Note 20 / Ultra', icon: '📱' },
+      { name: 'Autre Samsung', icon: '📱' },
+    ],
+    Xiaomi: [
+      { name: 'Xiaomi 15 / 14 / 13', icon: '📱' },
+      { name: 'Redmi Note 14 / 13', icon: '📱' },
+      { name: 'Redmi Note 12 / 11', icon: '📱' },
+      { name: 'Redmi 13 / 12 / 13C', icon: '📱' },
+      { name: 'POCO X6 / X5 / F5', icon: '📱' },
+      { name: 'Xiaomi Mi 11 / 12', icon: '📱' },
+      { name: 'Autre Xiaomi / Redmi', icon: '📱' },
+    ],
+    Huawei: [
+      { name: 'Pura 70 / 60 Pro', icon: '📱' },
+      { name: 'P50 / P50 Pro', icon: '📱' },
+      { name: 'P40 / P40 Pro', icon: '📱' },
+      { name: 'P30 / P30 Pro', icon: '📱' },
+      { name: 'Mate 60 / 50 / 40', icon: '📱' },
+      { name: 'Nova 11 / 12', icon: '📱' },
+      { name: 'Autre Huawei', icon: '📱' },
+    ],
+    OnePlus: [
+      { name: 'OnePlus 13 / 12', icon: '📱' },
+      { name: 'OnePlus Nord 4 / CE4', icon: '📱' },
+      { name: 'OnePlus Nord 3 / 2', icon: '📱' },
+      { name: 'OnePlus 11 / 10 Pro', icon: '📱' },
+      { name: 'Autre OnePlus', icon: '📱' },
+    ],
+    Autre: [
+      { name: 'Oppo Find / Reno', icon: '📱' },
+      { name: 'Sony Xperia', icon: '📱' },
+      { name: 'Motorola Edge / Moto G', icon: '📱' },
+      { name: 'Nokia', icon: '📱' },
+      { name: 'Google Pixel', icon: '📱' },
+      { name: 'Realme', icon: '📱' },
+      { name: 'Autre marque', icon: '📱' },
+    ]
+  };
+
+  function setDots(step) {
+    for (let i = 1; i <= 4; i++) {
+      const dot = document.getElementById('dot' + i);
+      if (i < step) dot.className = 'step-dot done';
+      else if (i === step) dot.className = 'step-dot active';
+      else dot.className = 'step-dot';
+    }
+  }
+
+  function selectBrand(brand, icon) {
+    selectedBrand = brand;
+    document.getElementById('step2-title').textContent = `Quel modèle ${brand} ?`;
+    const grid = document.getElementById('models-grid');
+    grid.innerHTML = '';
+    (models[brand] || []).forEach(m => {
+      const btn = document.createElement('div');
+      btn.className = 'option-btn';
+      btn.innerHTML = `<span class="opt-icon">${m.icon}</span><span class="opt-name">${m.name}</span>`;
+      btn.onclick = () => selectModel(m.name);
+      grid.appendChild(btn);
+    });
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setDots(2);
+  }
+
+  function selectModel(model) {
+    selectedModel = model;
+    document.getElementById('step3').classList.remove('hidden');
+    document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setDots(3);
+  }
+
+  function selectRepair(name, icon, moMin, moMax) {
+    selectedRepair = name;
+    document.getElementById('devis-title').textContent = `${name} — ${selectedBrand} ${selectedModel}`;
+    document.getElementById('devis-mo').textContent = `${moMin} – ${moMax}€`;
+    document.getElementById('devis-composant').textContent = 'Sur devis (gratuit)';
+    document.getElementById('devis-total').textContent = `à partir de ${moMin}€ + pièce`;
+    document.getElementById('step4').classList.remove('hidden');
+    document.getElementById('step4').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setDots(4);
+  }
+
+  function resetAll() {
+    selectedBrand = ''; selectedModel = ''; selectedRepair = '';
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step3').classList.add('hidden');
+    document.getElementById('step4').classList.add('hidden');
+    document.querySelectorAll('.option-btn, .repair-btn').forEach(b => b.classList.remove('selected'));
+    setDots(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
